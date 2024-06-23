@@ -1,0 +1,6 @@
+---
+
+ip_host_os: "192.168.1.51"
+username_host_os: "wint"
+passwd_username_host_os: "secretpassword"
+type_host_os: "linux"

@@ -1,0 +1,21 @@
+---
+#Configure iscis-target and iscsi-initiators
+- import_playbook: iscsi-configuration.yml
+
+#Deploy pacemaker/corosync cluster
+- import_playbook: pcs.yml
+
+#Configure dlm and lvmlockd resources
+- import_playbook: dlm-clvmd-rsc.yml
+
+#Configure clustered LVM
+- import_playbook: shared-lvm.yml
+
+#Make GFS2 filesystem for 3 nodes
+- import_playbook: mk-gfs2.yml
+
+#Configure GFS2 filesystem resources in cluster
+- import_playbook: gfs2-rsc.yml
+
+#Configure fencing
+- import_playbook: fence.yml

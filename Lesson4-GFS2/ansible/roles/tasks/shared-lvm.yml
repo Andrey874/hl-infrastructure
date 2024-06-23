@@ -1,0 +1,35 @@
+---
+- name: "Prepearing cluster LVM"
+  become: true
+  hosts: nodes
+
+  tasks:
+  - name: mkdir /mnt/gfs2
+    file:
+      path=/mnt/gfs2
+      state=directory
+
+  - name: Add physical volume on node2 and node3
+    command: "pvcreate /dev/sdb"
+    when: "ansible_hostname in ['node2', 'node3']"
+
+  - name: Add /dev/sdb to pv
+    lvg:
+      vg: shared_vg
+      pvs: /dev/sdb
+      vg_options: "--shared"
+    when: ansible_hostname == 'node1'
+
+  - name: add the shared devices to the devices file
+    command: "lvmdevices --adddev /dev/sdb"
+
+  - name: Start the lock manager for shared volume group
+    command: "vgchange --lockstart shared_vg"
+
+  - name: Create the shared logical volumes
+    lvol:
+      vg: shared_vg
+      lv: shared_lv
+      size: 1024m
+      opts: --activate sy
+    when: ansible_hostname == 'node1'

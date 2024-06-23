@@ -1,0 +1,124 @@
+---
+- name: "iscsi target deploy"
+  become: true
+  hosts: target
+
+  tasks:
+  - name: install packages
+    dnf:
+      name: "targetcli"
+      state: "present"
+
+  - name: "Enable targetclid"
+    systemd:
+      name: "targetclid"
+      state: "started"
+      enabled: true
+
+  - name: "Enable target"
+    systemd:
+      name: "target"
+      state: "started"
+      enabled: true
+
+  - name: Add block device
+    command: sudo targetcli /backstores/block create disk01 /dev/sdb
+    ignore_errors: true
+
+  - name: Create IQN
+    command: targetcli /iscsi create iqn.2024-06.my.hw2
+    ignore_errors: true
+
+  - name: Create lun
+    command: targetcli /iscsi/iqn.2024-06.my.hw2/tpg1/luns create /backstores/block/disk01 lun=1
+    ignore_errors: true
+
+  - name: Create acls
+    command: "targetcli /iscsi/iqn.2024-06.my.hw2/tpg1/acls create {{ item }}"
+    with_items:
+      - iqn.2024-06.my.hw2:node1
+      - iqn.2024-06.my.hw2:node2
+      - iqn.2024-06.my.hw2:node3
+    ignore_errors: true
+
+  - name: Save target config
+    command: targetcli saveconfig
+
+  - name: Disable firewalld
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: false
+
+- name: Initiator configs
+  become: true
+  hosts: nodes
+
+  tasks:
+  - name: Disable firewalld
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: false
+
+  - name: install packages
+    become: true
+    dnf:
+      name: "iscsi-initiator-utils"
+      state: "present"
+
+  - name: Touch initiatorname.iscsi
+    file:
+      path: /etc/iscsi/initiatorname.iscsi
+      state: touch
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: Configuring initiatorname.iscs on node1
+    lineinfile:
+      path: /etc/iscsi/initiatorname.iscsi
+      #regexp: '^InitiatorName='
+      line: InitiatorName=iqn.2024-06.my.hw2:node1
+    when:
+      ansible_hostname == 'node1'
+    notify: restart iscsid
+
+  - name: Configuring initiatorname.iscs on node2
+    lineinfile:
+      path: /etc/iscsi/initiatorname.iscsi
+      #regexp: '^InitiatorName='
+      line: InitiatorName=iqn.2024-06.my.hw2:node2
+    when:
+      ansible_hostname == 'node2'
+    notify: restart iscsid
+
+  - name: Configuring initiatorname.iscs on node3
+    lineinfile:
+      path: /etc/iscsi/initiatorname.iscsi
+      #regexp: '^InitiatorName='
+      line: InitiatorName=iqn.2024-06.my.hw2:node3
+    when:
+      ansible_hostname == 'node3'
+    notify: restart iscsid
+
+  - name: Add target
+    command: iscsiadm -m discoverydb -t st -p iscsi-target -o new
+
+  - name: Discover target
+    command: iscsiadm -m discoverydb -t sendtargets -p iscsi-target --discover
+
+  - name: Target login
+    command: iscsiadm -m node -T iqn.2024-06.my.hw2 -l
+
+  - name: Enable iscsid
+    systemd:
+      name: iscsi
+      state: started
+      enabled: true
+
+  handlers:
+    - name: restart iscsid
+      systemd:
+        name: iscsi
+        state: restarted

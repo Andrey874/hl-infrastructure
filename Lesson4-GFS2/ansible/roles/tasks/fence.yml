@@ -1,0 +1,34 @@
+---
+- name: "Add fencing"
+  become: true
+  vars_files: "../vars/main.yml"
+  hosts: nodes
+
+  tasks:
+
+  - name: add fence_vbox on all nodes
+    copy: src=/home/ansible/ansible/fence_vbox dest=/usr/sbin/ mode=755
+
+  - name: Add fencing on node1
+    shell: "pcs stonith create node1_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node1' pcmk_host_list='node1' host_os=windows && pcs constraint location node1_fence avoids node1=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'windows'
+
+  - name: Add fencing on node2
+    shell: "pcs stonith create node2_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node2' pcmk_host_list='node2' host_os=windows && pcs constraint location node2_fence avoids node2=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'windows'
+
+  - name: Add fencing on node3
+    shell: "pcs stonith create node3_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node3' pcmk_host_list='node3' host_os=windows && pcs constraint location node3_fence avoids node3=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'windows'
+
+  - name: Add fencing on node1 if host os linux
+    shell: "pcs stonith create node1_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node1' pcmk_host_list='node1' && pcs constraint location node1_fence avoids node1=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'linux'
+
+  - name: Add fencing on node2 if host os linux
+    shell: "pcs stonith create node2_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node2' pcmk_host_list='node2' && pcs constraint location node2_fence avoids node2=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'linux'
+
+  - name: Add fencing on node3 if host os linux
+    shell: "pcs stonith create node3_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='node3' pcmk_host_list='node3' && pcs constraint location node3_fence avoids node3=INFINITY"
+    when: ansible_hostname == 'node1' and type_host_os == 'linux'

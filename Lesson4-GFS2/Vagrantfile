@@ -1,0 +1,153 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+home = ENV['HOME']
+
+Vagrant.configure(2) do |config|
+
+  config.vm.define "node1" do |main|
+    main.vm.network "public_network",adapter: 2, :device => "eth1", bridge: "Realtek PCIe GbE Family Controller"
+    main.vm.network "private_network", adapter: 3, :device => "eth2", ip: '10.0.0.2', netmask: "255.255.255.0" # Management
+    main.vm.hostname = "node1"
+    main.vm.box = "almalinux/9.4"
+    main.vm.provision "shell", inline: <<-SHELL
+    mkdir -p /etc/skel/.ssh
+    echo '10.0.0.2  node1' >> /etc/hosts
+    echo '10.0.0.3  node2' >> /etc/hosts
+    echo '10.0.0.4  node3' >> /etc/hosts
+    echo '10.0.0.60 iscsi-target' >> /etc/hosts
+    useradd -m -s /bin/bash -p `openssl passwd -1 -salt xyz 123321ab` ansible
+    usermod -aG wheel ansible
+    sed -i 's/^# %wheel/%wheel/' /etc/sudoers
+    sed -i '/^127\.0\.1\.1.*$/d' /etc/hosts
+    SHELL
+    main.vm.provider :virtualbox do |virtualbox|
+      virtualbox.name = "node1"
+      virtualbox.customize ["modifyvm", :id, "--memory", "2048"]
+      virtualbox.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "node2" do |main|
+    main.vm.network "public_network",adapter: 2, :device => "eth1", bridge: "Realtek PCIe GbE Family Controller"
+    main.vm.network "private_network", adapter: 3, :device => "eth2", ip: '10.0.0.3', netmask: "255.255.255.0" # Management
+    main.vm.hostname = "node2"
+    main.vm.box = "almalinux/9.4"
+    main.vm.provision "shell", inline: <<-SHELL
+    mkdir -p /etc/skel/.ssh
+    echo '10.0.0.2  node1' >> /etc/hosts
+    echo '10.0.0.3  node2' >> /etc/hosts
+    echo '10.0.0.4  node3' >> /etc/hosts
+    echo '10.0.0.60 iscsi-target' >> /etc/hosts
+    useradd -m -s /bin/bash -p `openssl passwd -1 -salt xyz 123321ab` ansible
+    usermod -aG wheel ansible
+    sed -i 's/^# %wheel/%wheel/' /etc/sudoers
+    sed -i '/^127\.0\.1\.1.*$/d' /etc/hosts
+    SHELL
+    main.vm.provider :virtualbox do |virtualbox|
+      virtualbox.name = "node2"
+      virtualbox.customize ["modifyvm", :id, "--memory", "2048"]
+      virtualbox.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "node3" do |main|
+    main.vm.network "public_network",adapter: 2, :device => "eth1", bridge: "Realtek PCIe GbE Family Controller"
+    main.vm.network "private_network", adapter: 3, :device => "eth2", ip: '10.0.0.4', netmask: "255.255.255.0" # Management
+    main.vm.hostname = "node3"
+    main.vm.box = "almalinux/9.4"
+    main.vm.provision "shell", inline: <<-SHELL
+    mkdir -p /etc/skel/.ssh
+    echo '10.0.0.2  node1' >> /etc/hosts
+    echo '10.0.0.3  node2' >> /etc/hosts
+    echo '10.0.0.4  node3' >> /etc/hosts
+    echo '10.0.0.60 iscsi-target' >> /etc/hosts
+    useradd -m -s /bin/bash -p `openssl passwd -1 -salt xyz 123321ab` ansible
+    usermod -aG wheel ansible
+    sed -i 's/^# %wheel/%wheel/' /etc/sudoers
+    sed -i '/^127\.0\.1\.1.*$/d' /etc/hosts
+    SHELL
+    main.vm.provider :virtualbox do |virtualbox|
+      virtualbox.name = "node3"
+      virtualbox.customize ["modifyvm", :id, "--memory", "2048"]
+      virtualbox.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+
+  config.vm.define "iscsi-target" do |main|
+    main.vm.network "public_network",adapter: 2, :device => "eth1", bridge: "Realtek PCIe GbE Family Controller"
+    main.vm.network "private_network", adapter: 3, :device => "eth2", ip: '10.0.0.60', netmask: "255.255.255.0" # Management
+    main.vm.hostname = "iscsi-target"
+    main.vm.box = "almalinux/9.2"
+    main.vm.provision "shell", inline: <<-SHELL
+    mkdir -p /etc/skel/.ssh
+    echo '10.0.0.2  node1' >> /etc/hosts
+    echo '10.0.0.3  node2' >> /etc/hosts
+    echo '10.0.0.4  node3' >> /etc/hosts
+    echo '10.0.0.60 iscsi-target' >> /etc/hosts
+    useradd -m -s /bin/bash -p `openssl passwd -1 -salt xyz 123321ab` ansible
+    usermod -aG wheel ansible
+    sed -i 's/^# %wheel/%wheel/' /etc/sudoers
+    sed -i '/^127\.0\.1\.1.*$/d' /etc/hosts
+    dnf install sshpass -y
+    dnf -y install epel-release && dnf -y install ansible
+    cp -r /vagrant/ansible /home/ansible
+    chown -R ansible:ansible /home/ansible/ansible
+    ssh-keygen -q -t rsa -N "" -f "/afs/id_rsa"
+    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config && systemctl reload sshd
+    cp -f /afs/id_rsa /home/vagrant/.ssh/
+    chown vagrant:vagrant /home/vagrant/.ssh/id_rsa
+    chmod 0600 /home/vagrant/.ssh/id_rsa
+    mkdir -p /root/.ssh/
+    cp -f /afs/id_rsa /root/.ssh/
+    chown root:root /root/.ssh/id_rsa
+    chmod 0600 /root/.ssh/id_rsa
+    cp -f /afs/id_rsa /home/ansible/.ssh/
+    chown ansible:ansible /home/ansible/.ssh/id_rsa
+    chmod 0600 /home/ansible/.ssh/id_rsa
+
+    ssh-keyscan -t rsa node1 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node2 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node3 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa iscsi-target >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    chown vagrant:vagrant /home/vagrant/.ssh/known_hosts
+    chmod 0600 /home/vagrant/.ssh/known_hosts
+
+    ssh-keyscan -t rsa node1 >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node2 >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node3 >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa iscsi-target >> /root/.ssh/known_hosts 2>/dev/null
+
+    ssh-keyscan -t rsa node1 >> /home/ansible/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node2 >> /home/ansible/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa node3 >> /home/ansible/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa iscsi-target >> /home/ansible/.ssh/known_hosts 2>/dev/null
+    chown ansible:ansible /home/ansible/.ssh/known_hosts
+    chmod 0600 /home/ansible/.ssh/known_hosts
+
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@node1
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@node2
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@node3
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@iscsi-target
+
+    sshpass -p "123321ab" ssh-copy-id -f -i /afs/id_rsa.pub ansible@node1
+    sshpass -p "123321ab" ssh-copy-id -f -i /afs/id_rsa.pub ansible@node2
+    sshpass -p "123321ab" ssh-copy-id -f -i /afs/id_rsa.pub ansible@node3
+    sshpass -p "123321ab" ssh-copy-id -f -i /afs/id_rsa.pub ansible@iscsi-target
+
+    ssh -i /root/.ssh/id_rsa vagrant@node1 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh -i /root/.ssh/id_rsa vagrant@node2 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh -i /root/.ssh/id_rsa vagrant@node3 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh -i /root/.ssh/id_rsa vagrant@iscsi-target "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    SHELL
+    main.vm.provider :virtualbox do |virtualbox|
+      virtualbox.name = "iscsi-target"
+      virtualbox.customize ["modifyvm", :id, "--memory", "2048"]
+      virtualbox.customize ["modifyvm", :id, "--cpus", "2"]
+      unless File.exist?('../storage/hdd_sdb.vdi')
+        virtualbox.customize ['createhd', '--filename', '../storage/hdd_sdb.vdi', '--variant', 'Fixed', '--size', 2048]
+        virtualbox.customize ['storageattach', :id,  '--storagectl', 'SATA Controller', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', '../storage/hdd_sdb.vdi']
+    end
+  end
+  end   
+end
