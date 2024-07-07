@@ -1,0 +1,74 @@
+---
+- name: Deploy backend
+  become: true
+  hosts: backend
+
+  tasks:
+  - name: Install software
+    dnf:
+      name:
+        - nginx
+        - tar
+        - php-fpm 
+        - php-curl 
+        - php-gd 
+        - php-intl 
+        - php-mbstring 
+        - php-soap 
+        - php-xml 
+        - php-zip 
+        - php-mysqli
+      state: present
+
+  - name: Add nginx config
+    template: 
+      src: ../templates/apps-wordpress.conf.j2
+      dest: /etc/nginx/conf.d/wordpress.conf
+
+  - name: "Enable nginx"
+    systemd:
+      name: "nginx"
+      state: "started"
+      enabled: true
+
+  - name: Modify /etc/php.ini
+    lineinfile:
+      path: /etc/php.ini
+      regexp: '^;cgi.fix_pathinfo='
+      line: cgi.fix_pathinfo=0
+
+  - name: restart php-fpm service
+    systemd:
+      name: php-fpm
+      state: restarted
+
+  - name: download latest version of the WordPress
+    shell: "cd /tmp && curl -LO https://wordpress.org/latest.tar.gz"
+
+  - name: Extract the compressed file to create the WordPress directory structure
+    command: tar xzvf /tmp/latest.tar.gz -C /var/www/
+
+  - name: change the wp-config-sample.php config file name to wp-config.php
+    shell: "cp /var/www/wordpress/wp-config-sample.php /var/www/wordpress/wp-config.php && chown -R nginx:nginx /var/www/wordpress/"
+
+  - name: Configuration wp-config.php
+    lineinfile:
+      dest: /var/www/wordpress/wp-config.php
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - {'regexp': "define\\( 'DB_NAME', '(.+)' \\);", 'line': "define( 'DB_NAME', 'web_app_db' );"}
+      - {'regexp': "define\\( 'DB_USER', '(.+)' \\);", 'line': "define( 'DB_USER', 'web_app_user' );"}
+      - {'regexp': "define\\( 'DB_PASSWORD', '(.+)' \\);", 'line': "define( 'DB_PASSWORD', '123321ab' );"}
+      - {'regexp': "define\\( 'DB_HOST', '(.+)' \\);", 'line': "define( 'DB_HOST', 'database:3306' );"}
+
+  - name: Configuration wp-config.php
+    lineinfile:
+      dest: /var/www/wordpress/wp-config.php
+      line: "define('FS_METHOD', 'ssh');"
+
+      
+
+  
+
+  

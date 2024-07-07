@@ -1,0 +1,16 @@
+upstream backend {
+    least_conn;
+    server 127.0.0.1:9000;
+    server 127.0.0.1:9001;
+    server 127.0.0.1:9002;
+    server 127.0.0.1:9003;
+}
+
+server {
+	listen 80;
+	server_name {{ ansible_all_ipv4_addresses[0] }};
+	
+	location / {
+		proxy_pass http://backend;
+	}
+}

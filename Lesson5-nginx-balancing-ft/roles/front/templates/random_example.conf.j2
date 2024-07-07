@@ -1,0 +1,15 @@
+upstream backend {
+	random; # two least_conn;
+	server backend1.example.com;
+	server backend2.example.com;
+	server backend3.example.com;
+}
+
+server {
+	listen 80;
+	server_name {{ ansible_all_ipv4_addresses[0] }};
+	
+	location / {
+		proxy_pass http://backend;
+	}
+}

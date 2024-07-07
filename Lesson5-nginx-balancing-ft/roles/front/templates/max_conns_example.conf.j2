@@ -1,0 +1,7 @@
+upstream backend {
+	server b1.example.com max_conns=1000;
+	server b2.example.com max_conns=500;
+	server b3.example.com; # max_conns=0 (default - unlimited)
+}
+
+

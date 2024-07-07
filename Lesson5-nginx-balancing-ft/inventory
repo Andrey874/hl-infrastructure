@@ -1,0 +1,9 @@
+[frontend]
+balancer ansible_host=balancer ansible_user=cloud-user
+
+[backend]
+app-1 ansible_host=app-1 ansible_user=cloud-user
+app-2 ansible_host=app-2 ansible_user=cloud-user
+
+[db]
+database ansible_host=database ansible_user=cloud-user

@@ -1,0 +1,12 @@
+upstream backend {
+        server app-1:80;
+        server app-2:80;
+}
+
+server {
+        listen 80;
+        server_name {{ ansible_all_ipv4_addresses[0] }};
+        location / {
+                proxy_pass http://backend;
+        }
+}

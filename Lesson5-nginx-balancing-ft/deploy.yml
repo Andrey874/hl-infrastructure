@@ -1,0 +1,8 @@
+---
+- import_playbook: roles/predeploy/tasks/main.yml
+
+- import_playbook: roles/db/tasks/main.yml
+
+- import_playbook: roles/apps/tasks/main.yml
+
+- import_playbook: roles/front/tasks/main.yml

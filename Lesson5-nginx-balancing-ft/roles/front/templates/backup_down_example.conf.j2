@@ -1,0 +1,5 @@
+upstream backend {
+	server web1.example.com;
+	server web2.example.com backup;
+	server web3.example.com down;
+}

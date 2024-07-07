@@ -1,0 +1,58 @@
+---
+- name: Disable selinux and firewalld
+  become: true
+  hosts: db
+
+  tasks:
+  - name: Install mariadb
+    dnf:
+      name: 
+        - mariadb-server
+        - mysql-common
+        - python3-PyMySQL
+      state: present
+
+  - name: ensure mariadb is enabled to run on startup
+    service:
+      name: mariadb
+      state: started
+      enabled: true
+
+  - name: Copy .my.cnf file into the home folder
+    copy: 
+      src: ../files/root-my.cnf
+      dest: /root/.my.cnf 
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: root password
+    mysql_user:
+      name: root
+      password: 123321ab
+      host: localhost
+      state: present
+      check_implicit_admin: yes
+      priv: '*.*:ALL,GRANT'
+      login_unix_socket: /var/lib/mysql/mysql.sock
+      
+  - name: Create DataBase
+    mysql_db:
+      name: web_app_db
+      login_user: root
+      login_password: 123321ab
+      state: present
+      
+  - name: create webappuser
+    mysql_user:
+      name: web_app_user
+      password: 123321ab
+      host: "{{ item }}"
+      login_unix_socket: /var/lib/mysql/mysql.sock
+      priv: 'web_app_db.*:ALL,GRANT'
+      login_user: root
+      login_password: 123321ab
+      state: present
+    with_items:
+      - app-1
+      - app-2

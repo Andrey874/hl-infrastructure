@@ -1,0 +1,5 @@
+upstream backend {
+	server backend1.example.com max_fails=2 fail_timeout=3; 
+	server backend2.example.com; # max_fails=1 fail_timeout=10
+	server backend3.example.com; # (default)
+}
