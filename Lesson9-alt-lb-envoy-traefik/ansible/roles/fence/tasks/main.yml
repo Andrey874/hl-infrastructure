@@ -1,0 +1,21 @@
+- name: add fence_vbox on all nodes
+  copy: src=/home/ansible/ansible/fence_vbox dest=/usr/sbin/ mode=755
+
+- name: enable stonith
+  command: "pcs property set stonith-enabled=true"
+
+- name: Add fencing on app1
+  shell: "pcs stonith create app1_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='app1' pcmk_host_list='10.1.1.11' pcmk_reboot_action='true' host_os=windows && pcs constraint location app1_fence avoids '10.1.1.11'=INFINITY"
+  when: ansible_hostname == 'app1' and type_host_os == 'windows'
+
+- name: Add fencing on app2
+  shell: "pcs stonith create app2_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='app2' pcmk_host_list='10.1.1.2' pcmk_reboot_action='true' host_os=windows && pcs constraint location app2_fence avoids '10.1.1.2'=INFINITY"
+  when: ansible_hostname == 'app1' and type_host_os == 'windows'
+
+- name: Add fencing on app1 if host os linux
+  shell: "pcs stonith create app1_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='app1' pcmk_host_list='10.1.1.11' pcmk_reboot_action='true' && pcs constraint location app1_fence avoids '10.1.1.11'=INFINITY"
+  when: ansible_hostname == 'app1' and type_host_os == 'linux'
+
+- name: Add fencing on app2 if host os linux
+  shell: "pcs stonith create app2_fence fence_vbox ip='{{ ip_host_os }}' username='{{ username_host_os }}' password='{{ passwd_username_host_os }}' power_wait='10' ssh='1' plug='app2' pcmk_host_list='10.1.1.2'  pcmk_reboot_action='true' && pcs constraint location app2_fence avoids '10.1.1.2'=INFINITY"
+  when: ansible_hostname == 'app1' and type_host_os == 'linux'

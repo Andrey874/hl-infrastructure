@@ -1,0 +1,4 @@
+- name: restart iscsid
+  systemd:
+    name: iscsi
+    state: restarted

@@ -1,0 +1,46 @@
+- name: install packages
+  become: true
+  dnf:
+    name: "iscsi-initiator-utils"
+    state: "present"
+
+- name: Touch initiatorname.iscsi
+  file:
+    path: /etc/iscsi/initiatorname.iscsi
+    state: touch
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Configuring initiatorname.iscs on app1
+  lineinfile:
+    path: /etc/iscsi/initiatorname.iscsi
+    #regexp: '^InitiatorName='
+    line: InitiatorName=iqn.2024-07.my.hw4:app1
+  when:
+    ansible_hostname == 'app1'
+  notify: restart iscsid
+
+- name: Configuring initiatorname.iscs on app2
+  lineinfile:
+    path: /etc/iscsi/initiatorname.iscsi
+    #regexp: '^InitiatorName='
+    line: InitiatorName=iqn.2024-07.my.hw4:app2
+  when:
+    ansible_hostname == 'app2'
+  notify: restart iscsid
+
+- name: Add target
+  command: iscsiadm -m discoverydb -t st -p 10.1.1.10 -o new
+
+- name: Discover target
+  command: iscsiadm -m discoverydb -t sendtargets -p 10.1.1.10 --discover
+
+- name: Target login
+  command: iscsiadm -m node -T iqn.2024-07.my.hw4 -l
+
+- name: Enable iscsid
+  systemd:
+    name: iscsi
+    state: started
+    enabled: true

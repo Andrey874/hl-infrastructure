@@ -1,0 +1,57 @@
+- name: Install clusters packages
+  dnf:
+    name:
+      - dlm
+      - lvm2-lockd
+      - gfs2-utils
+      - pacemaker
+      - pcs
+      - fence-agents-all
+    state: present
+    enablerepo: resilientstorage,highavailability
+
+- name: Enable pcsd
+  systemd:
+    name: pcsd
+    state: started
+    enabled: true
+
+- name: Set password hacluster user
+  shell: "echo hapassword | passwd --stdin hacluster"
+
+- name: Hosts auth
+  command: "pcs host auth 10.1.1.11 10.1.1.2 -u hacluster -p hapassword"
+  when: ansible_hostname == 'app1'
+
+- name: Cluster setup
+  command: "pcs cluster setup skynet 10.1.1.11 10.1.1.2"
+  when: ansible_hostname == 'app1'
+
+- name: Enable cluster
+  command: "{{ item }}"
+  with_items:
+    - "pcs cluster enable --all"
+    - "pcs cluster start --all"
+  when: ansible_hostname == 'app1'
+
+- name: Change lvm.conf
+  lineinfile:
+    path: /etc/lvm/lvm.conf
+    regexp: 'use_lvmlockd ='
+    line: use_lvmlockd = 1
+
+- name: Enable lvmlockd
+  systemd:
+    name: lvmlockd
+    state: started
+    enabled: true
+
+- name: Enable dlm
+  systemd:
+    name: dlm
+    state: started
+    enabled: true
+
+- name: waiting... 15 sec
+  pause:
+    seconds: 15

@@ -1,0 +1,39 @@
+
+- name: install packages
+  dnf:
+    name: "targetcli"
+    state: "present"
+
+- name: "Enable targetclid"
+  systemd:
+    name: "targetclid"
+    state: "started"
+    enabled: true
+
+- name: "Enable target"
+  systemd:
+    name: "target"
+    state: "started"
+    enabled: true
+
+- name: Add block device
+  command: sudo targetcli /backstores/block create disk01 /dev/sdb
+  ignore_errors: true
+
+- name: Create IQN
+  command: targetcli /iscsi create iqn.2024-07.my.hw4
+  ignore_errors: true
+
+- name: Create lun
+  command: targetcli /iscsi/iqn.2024-07.my.hw4/tpg1/luns create /backstores/block/disk01 lun=1
+  ignore_errors: true
+
+- name: Create acls
+  command: "targetcli /iscsi/iqn.2024-07.my.hw4/tpg1/acls create {{ item }}"
+  with_items:
+    - iqn.2024-07.my.hw4:app1
+    - iqn.2024-07.my.hw4:app2
+  ignore_errors: true
+
+- name: Save target config
+  command: targetcli saveconfig

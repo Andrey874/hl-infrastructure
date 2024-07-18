@@ -1,0 +1,6 @@
+- name: Format the volumes with a GFS2 file system
+  shell: "echo 'y' | mkfs.gfs2 -j2 -p lock_dlm -t skynet:gfs2 /dev/shared_vg/shared_lv"
+
+- name: Waiting 10 sec...
+  pause:
+    seconds: 10

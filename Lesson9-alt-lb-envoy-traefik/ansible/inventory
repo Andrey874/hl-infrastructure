@@ -1,0 +1,22 @@
+[load_balancers]
+lb1 ansible_host=lb1 ansible_user=ansible
+lb2 ansible_host=lb2 ansible_user=ansible 
+
+[nodes]
+app1 ansible_host=app1 ansible_user=ansible
+app2 ansible_host=app2 ansible_user=ansible
+
+[target]
+db-dss ansible_host=db-dss ansible_user=ansible
+
+[pcs_master]
+app1 ansible_host=app1 ansible_user=ansible
+
+[data_base]
+db-dss ansible_host=db-dss ansible_user=ansible
+
+[keepalived_master]
+lb1  ansible_host=lb1 ansible_user=ansible
+
+[keepalived_backup]
+lb2  ansible_host=lb2 ansible_user=ansible
