@@ -1,0 +1,93 @@
+---
+
+- name:  "Update wsrep_provider in the mysqld.cnf"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_provider='
+    line: wsrep_provider=/usr/lib/galera4/libgalera_smm.so 
+
+- name:  "Update wsrep_cluster_address in the mysqld.cnf"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_cluster_address='
+    line: wsrep_cluster_address=gcomm://10.0.26.201,10.0.26.202,10.0.26.203
+
+- name:  "Update binlog_format in the mysqld.cnf"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^binlog_format='
+    line: binlog_format=ROW
+
+- name:  "Update wsrep_cluster_name in the mysqld.cnf"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_cluster_name='
+    line: wsrep_cluster_name=pxc-cluster
+
+- name:  "Update wsrep_node_address in the mysqld.cnf on pxc1"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_address='
+    line: wsrep_node_address=10.0.26.201
+  when: ansible_hostname == 'pxc1'
+
+- name:  "Update wsrep_node_name in the mysqld.cnf on pxc1"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_name='
+    line: wsrep_node_name=pxc1
+  when: ansible_hostname == 'pxc1'
+
+- name:  "Update wsrep_node_address in the mysqld.cnf on pxc2"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_address='
+    line: wsrep_node_address=10.0.26.202
+  when: ansible_hostname == 'pxc2'
+
+- name:  "Update wsrep_node_name in the mysqld.cnf on pxc2"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_name='
+    line: wsrep_node_name=pxc2
+  when: ansible_hostname == 'pxc2'
+
+- name:  "Update wsrep_node_address in the mysqld.cnf on pxc3"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_address='
+    line: wsrep_node_address=10.0.26.203
+  when: ansible_hostname == 'pxc3'
+
+- name:  "Update wsrep_node_name in the mysqld.cnf on pxc3"
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^wsrep_node_name='
+    line: wsrep_node_name=pxc3
+  when: ansible_hostname == 'pxc3'
+
+- name: Copy the same SSL certs to all nodes (./ssl dir from project)
+  ansible.builtin.copy:
+    src: "/home/vagrant/ssl/"
+    dest: /var/lib/mysql/
+    owner: mysql
+    group: mysql
+    mode: u=rw,g=rw,o=
+
+- name: "Bootstrap pxc1"
+  service:
+    name: "mysql@bootstrap"
+    state: "started"
+  when:
+    ansible_hostname == 'pxc1'
+
+- name: waiting... 15 sec
+  pause:
+    seconds: 15
+
+- name: "Start pxc2 pxc3"
+  service:
+    name: "mysql"
+    state: "started"
+  when:
+    ansible_hostname in [ 'pxc2', 'pxc3' ]

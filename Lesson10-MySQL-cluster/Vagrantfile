@@ -1,0 +1,76 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+home = ENV['HOME']
+Vagrant.configure(2) do |config|
+  N = 3
+  (1..N).each do |i|
+    config.vm.define "pxc#{i}" do |node|
+      node.vm.box = "ubuntu/jammy64"
+      node.vm.synced_folder ".", "/vagrant"
+      node.vm.hostname = "pxc#{i}"
+      node.vm.network "public_network",adapter: 3, bridge: "Realtek PCIe GbE Family Controller"
+      node.vm.network "private_network", ip:"10.0.26.20#{i}"
+      node.vm.provision "shell", inline: <<-SHELL
+      rm /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+      echo '10.0.26.10  web' >> /etc/hosts
+      echo '10.0.26.201 pxc1' >> /etc/hosts
+      echo '10.0.26.202 pxc2' >> /etc/hosts
+      echo '10.0.26.203 pxc3' >> /etc/hosts
+      systemctl restart sshd
+      SHELL
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = "1024"
+        vb.name = "pxc#{i}"
+        vb.cpus = 2
+      end
+    end
+end
+    config.vm.define "web" do |main|
+    main.vm.network "public_network",adapter: 2, bridge: "Realtek PCIe GbE Family Controller"
+    main.vm.network "private_network", adapter: 3, ip: '10.0.26.10', netmask: "255.255.255.0" # Management
+    main.vm.hostname = "web"
+    main.vm.box = "almalinux/9.2"
+    main.vm.provision "shell", inline: <<-SHELL
+    echo '10.0.26.10  web' >> /etc/hosts
+    echo '10.0.26.201 pxc1' >> /etc/hosts
+    echo '10.0.26.202 pxc2' >> /etc/hosts
+    echo '10.0.26.203 pxc3' >> /etc/hosts
+    dnf -y install epel-release && dnf -y install ansible
+    ssh-keygen -q -t rsa -N "" -f "/afs/id_rsa"
+    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config && systemctl reload sshd
+    cp -f /afs/id_rsa /home/vagrant/.ssh/
+    chown vagrant:vagrant /home/vagrant/.ssh/id_rsa
+    chmod 0600 /home/vagrant/.ssh/id_rsa
+    mkdir -p /root/.ssh/
+    cp -f /afs/id_rsa /root/.ssh/
+    chown root:root /root/.ssh/id_rsa
+    chmod 0600 /root/.ssh/id_rsa
+    ssh-keyscan -t rsa web >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc1 >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc2 >> /root/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc3 >> /root/.ssh/known_hosts 2>/dev/null
+
+    ssh-keyscan -t rsa web >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc1 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc2 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    ssh-keyscan -t rsa pxc3 >> /home/vagrant/.ssh/known_hosts 2>/dev/null
+    chown vagrant:vagrant /home/vagrant/.ssh/known_hosts
+    chmod 0600 /home/vagrant/.ssh/known_hosts
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@web
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@pxc1
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@pxc2
+    sshpass -p "vagrant" ssh-copy-id -f -i /afs/id_rsa.pub vagrant@pxc3
+    ssh  vagrant@web "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh  vagrant@pxc1 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh  vagrant@pxc2 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    ssh  vagrant@pxc3 "sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config && sudo systemctl reload sshd"
+    SHELL
+    main.vm.provider :virtualbox do |virtualbox|
+      virtualbox.name = "db-dss"
+      virtualbox.customize ["modifyvm", :id, "--memory", "2048"]
+      virtualbox.customize ["modifyvm", :id, "--cpus", "2"]
+    end
+  end
+end
+

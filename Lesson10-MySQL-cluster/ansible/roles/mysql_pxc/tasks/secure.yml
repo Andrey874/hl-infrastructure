@@ -1,0 +1,41 @@
+---
+- name: "Set the root password"
+  mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: vagrant
+    check_implicit_admin: yes
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_items:
+    - "{{ ansible_hostname }}"
+    - "127.0.0.1"
+    - "::1"
+    - "localhost"
+  when: ansible_hostname == 'pxc1'
+  ignore_errors: yes
+
+- name: "Copy .my.cnf file into the root home folder"
+  template:
+    src: root-my-cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+
+- name: "Ensure anonymous users are not in the database"
+  mysql_user:
+    name: ''
+    host: "{{ item }}"
+    state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_items:
+    - "{{ ansible_hostname }}"
+    - "localhost"
+  when: ansible_hostname == 'pxc1'
+  
+
+- name: "Remove the test database"
+  mysql_db:
+    name: test
+    state: absent

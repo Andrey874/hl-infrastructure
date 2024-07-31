@@ -1,0 +1,25 @@
+---
+
+- name: "Add proxysql user"
+  mysql_user:
+    login_user: root
+    login_password: vagrant
+    name: proxysql
+    password: 'Pa$$w0rd'
+    priv: 'proxysql.*:ALL,GRANT'
+    state: "present"
+    host: '%'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: ansible_hostname == 'pxc1'
+
+- name: "Add sbuser user"
+  mysql_user:
+    login_user: root
+    login_password: vagrant
+    name: sbuser
+    password: 'Pa$$w0rd'
+    priv: '*.*:ALL'
+    state: "present"
+    host: '%'
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  when: ansible_hostname == 'pxc1'

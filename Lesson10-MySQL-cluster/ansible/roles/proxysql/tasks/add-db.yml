@@ -1,0 +1,11 @@
+---
+
+- name: Create a new database with name 'userdata'
+  shell: "mysql -u sbuser -p'Pa$$w0rd' -h 127.0.0.1 -P 6033 -e 'create database userdata';"
+
+- name: Restore DB
+  shell: "mysql -u sbuser -p'Pa$$w0rd' -h 127.0.0.1 -P 6033 userdata < /home/vagrant/ansible/userdata-backup-pxc.sql"
+
+
+
+  

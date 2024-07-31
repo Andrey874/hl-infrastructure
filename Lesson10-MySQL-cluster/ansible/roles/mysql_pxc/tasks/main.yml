@@ -1,0 +1,16 @@
+---
+
+- include_tasks: install.yml
+  tags: install
+
+- include_tasks: configure.yml
+  tags: configure
+
+- include_tasks: secure.yml
+  tags: secure
+
+- include_tasks: databases.yml
+  tags: databases
+
+- include_tasks: users.yml
+  tags: users

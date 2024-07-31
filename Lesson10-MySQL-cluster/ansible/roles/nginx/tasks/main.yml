@@ -1,0 +1,41 @@
+---
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+- name: Install software
+  dnf:
+    name:
+      - nginx
+      - fcgiwrap
+    state: present
+
+- name: Add nginx config
+  template: 
+    src: site.conf.j2
+    dest: /etc/nginx/conf.d/site.conf
+
+- name: Add nginx fcgiwrap.conf
+  template:
+    src: fcgiwrap.conf
+    dest: /etc/nginx/fcgiwrap.conf
+
+- name: create cgi-bin directory
+  copy:
+    src: /home/vagrant/ansible/cgi-bin
+    dest: /usr/lib
+    mode: 0755
+
+- name: Enable fcgi
+  systemd:
+    name: fcgiwrap@nginx.socket
+    enabled: true
+    state: started
+
+- name: "Enable nginx"
+  systemd:
+    name: "nginx"
+    state: "started"
+    enabled: true

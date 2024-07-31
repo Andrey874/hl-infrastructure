@@ -1,0 +1,7 @@
+[database]
+pxc1 ansible_host=pxc1 ansible_user=vagrant
+pxc2 ansible_host=pxc2 ansible_user=vagrant 
+pxc3 ansible_host=pxc3 ansible_user=vagrant
+
+[web]
+web ansible_host=web ansible_user=vagrant

@@ -1,0 +1,72 @@
+---
+
+- name: enable proxysql
+  systemd:
+    name: proxysql
+    enabled: true
+    state: started
+
+- name: Add a server pxc1
+  proxysql_backend_servers:
+    login_user: 'admin'
+    login_password: 'admin'
+    hostgroup_id: 1
+    hostname: '10.0.26.201'
+    state: present
+    load_to_runtime: true
+    save_to_disk: true
+
+- name: Add a server pxc2
+  proxysql_backend_servers:
+    login_user: 'admin'
+    login_password: 'admin'
+    hostgroup_id: 1
+    hostname: '10.0.26.202'
+    state: present
+    load_to_runtime: true
+    save_to_disk: true
+
+- name: Add a server pxc3
+  proxysql_backend_servers:
+    login_user: 'admin'
+    login_password: 'admin'
+    hostgroup_id: 1
+    hostname: '10.0.26.203'
+    state: present
+    load_to_runtime: true
+    save_to_disk: true
+
+- name: Set the value of a mysql-monitor_username
+  proxysql_global_variables:
+    login_user: 'admin'
+    login_password: 'admin'
+    variable: 'mysql-monitor_username'
+    value: proxysql
+
+- name: Set the value of a mysql-monitor_username
+  proxysql_global_variables:
+    login_user: 'admin'
+    login_password: 'admin'
+    variable: 'mysql-monitor_password'
+    value: Pa$$w0rd
+
+- name: Add a user
+  proxysql_mysql_users:
+    login_user: 'admin'
+    login_password: 'admin'
+    username: 'sbuser'
+    password: 'Pa$$w0rd'
+    state: present
+
+- name: Add a replication hostgroup
+  proxysql_replication_hostgroups:
+    login_user: 'admin'
+    login_password: 'admin'
+    writer_hostgroup: 0
+    reader_hostgroup: 1
+    comment: 'cluster1'
+    state: present
+
+
+
+  

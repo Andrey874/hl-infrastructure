@@ -1,0 +1,62 @@
+---
+
+- name: "Install gnupg"
+  apt:
+    name: gnupg
+    update_cache: yes
+
+- name: "Install percona-release package"
+  apt:
+    deb: "https://repo.percona.com/apt/percona-release_latest.{{ ansible_distribution_release }}_all.deb" # ansible_distribution_release from facts
+
+- name: "Update apt cache"
+  apt:
+    update_cache: yes
+
+- name: "Configure Percona repo for PXC"
+  ansible.builtin.shell: percona-release enable-only pxc-80 release
+
+- name: "Configure Percona repo for tools"
+  ansible.builtin.shell: percona-release enable tools release
+
+- name: "Update apt cache"
+  apt:
+    update_cache: yes
+
+- name: "Install python-is-python3 (Ubuntu >= Focal/20.04)"
+  apt:
+    name: "python-is-python3"
+  when:
+    - ansible_distribution_version is version_compare('20.04', '>=')
+
+- debug:
+    msg: "ansible_python_interpreter major version: {{ ansible_python.version.major }}"
+
+- name: "Install package dependencies for ansible MySQL modules (python 3)"
+  apt:
+    name: 
+      - "python3-pymysql"
+      - "python3-mysqldb"
+  when:
+    - ansible_python.version.major == 3 # from facts
+
+- name: "Install percona cluster packages, ProxySQL and dependencies on Ubuntu"
+  apt:
+    name:
+      - "percona-xtradb-cluster"
+      - "percona-xtradb-cluster-client"
+    state: "present"
+
+- name: "Install mc, percona-toolkit and Percona Xtrabackup"
+  apt:
+    name:
+      - percona-toolkit
+    update_cache: yes
+
+- name: "Adjust permissions of datadir"
+  file:
+    path: "{{ mysql_datadir }}" #from defaults
+    owner: "mysql"
+    group: "mysql"
+    mode: 0700
+    state: "directory"

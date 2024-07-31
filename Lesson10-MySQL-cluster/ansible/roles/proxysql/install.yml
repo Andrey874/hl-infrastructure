@@ -1,0 +1,35 @@
+---
+
+- name: "Install gnupg"
+  dnf:
+    name: gnupg2
+
+- name: "Install Percona RPM GPG KEY"
+  command: dnf install -y https://www.percona.com/downloads/RPM-GPG-KEY-percona
+  ignore_errors: yes
+
+- name: "Add Percona yum repository"
+  dnf:
+    name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    state: present
+
+- name: "Enable Percona repository (Percona version >= 8)"
+  command: "percona-release setup ps80 -y"
+
+- name: "Enable Percona toolkit (RH/CentOS/Rocky >= 8.0)"
+  command: "percona-release enable tools"
+
+- name: install percona-server-client
+  dnf:
+    name: percona-server-client
+    state: present
+ 
+- name: "Install proxysql2"
+  dnf:
+    name: proxysql2
+    state: present
+
+- name: "Install MySQL-python package (ansible python3)"
+  dnf:
+    name: "python3-PyMySQL"
+    state: present

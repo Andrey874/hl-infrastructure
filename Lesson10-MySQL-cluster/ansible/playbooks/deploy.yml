@@ -1,0 +1,23 @@
+---
+# playbook.yml file.
+- hosts: database
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - mysql_pxc
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - proxysql
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - nginx
+  tags: nginx
