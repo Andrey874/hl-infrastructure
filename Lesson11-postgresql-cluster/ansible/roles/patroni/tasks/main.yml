@@ -1,0 +1,23 @@
+---
+
+- name: Install patroni packages
+  apt:
+    name:
+    - python3-pip
+    - gcc
+    - python3-psycopg2
+    - patroni
+    - watchdog
+
+- name: Enable patroni
+  systemd:
+    name: patroni
+    state: started
+    enabled: true
+
+- name: Creat patroni configuration file
+  template:
+    src: patroni.yml.j2
+    dest: /etc/patroni/config.yml
+  notify:
+    - restart_patroni

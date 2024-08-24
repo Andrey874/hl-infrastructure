@@ -1,0 +1,7 @@
+[database-cluster]
+postgres-srv1 ansible_host=postgres-srv1 ansible_user=andrey etcd_host_name=etcd1 etcd_host_ip='10.0.0.11'
+postgres-srv2 ansible_host=postgres-srv2 ansible_user=andrey etcd_host_name=etcd2 etcd_host_ip='10.0.0.12'
+postgres-srv3 ansible_host=postgres-srv3 ansible_user=andrey etcd_host_name=etcd3 etcd_host_ip='10.0.0.13'
+
+[web]
+localhost ansible_connection=local ansible_user=andrey web_internal_ip='10.0.0.10'

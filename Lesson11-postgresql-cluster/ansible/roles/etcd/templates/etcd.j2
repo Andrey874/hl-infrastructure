@@ -1,0 +1,12 @@
+ETCD_NAME={{ etcd_host_name }}
+ETCD_DATA_DIR="/var/lib/etcd/pg-cluster"
+ETCD_LISTEN_PEER_URLS="http://{{ etcd_host_ip }}:2380"
+ETCD_LISTEN_CLIENT_URLS="http://{{ etcd_host_ip }}:2379,http://localhost:2379"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="http://{{ etcd_host_ip }}:2380"
+ETCD_INITIAL_CLUSTER="etcd1=http://10.0.0.11:2380,etcd2=http://10.0.0.12:2380,etcd3=http://10.0.0.13:2380"
+ETCD_INITIAL_CLUSTER_STATE="new"
+ETCD_INITIAL_CLUSTER_TOKEN="pg-cluster-skynet"
+ETCD_ADVERTISE_CLIENT_URLS="http://{{ etcd_host_ip }}:2379"
+ETCD_ELECTION_TIMEOUT="5000"
+ETCD_HEARTBEAT_INTERVAL="1000"
+ETCD_ENABLE_V2="true"

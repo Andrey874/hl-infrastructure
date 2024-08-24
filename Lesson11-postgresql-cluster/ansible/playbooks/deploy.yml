@@ -1,0 +1,42 @@
+---
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - etcd
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - postgresql
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - patroni
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - haproxy
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - createdb
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - web

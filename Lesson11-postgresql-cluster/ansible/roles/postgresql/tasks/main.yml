@@ -1,0 +1,47 @@
+---
+
+- name: Install lsb_release
+  apt:
+    name: lsb-release
+    state: present
+
+- name: Install wget
+  apt:
+    name: wget
+    state: present
+
+- name: Get release version
+  shell: "lsb_release -cs"
+  register: release_version
+
+- name: Add postgresql repo
+  lineinfile:
+    path: /etc/apt/sources.list.d/pgdg.list
+    line: "deb http://apt.postgresql.org/pub/repos/apt/  {{ release_version.stdout }}-pgdg main"
+    create: true
+    state: present
+
+- name: install gnupg
+  apt:
+    name: gnupg
+    state: present   
+ 
+- name: Add gpg key
+  shell: "wget --quiet -O - https://postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -"
+
+- name: Set locale
+  locale_gen:
+    name: ru_RU.UTF-8
+    state: present
+
+- name: Install postgesql-15
+  apt:
+    name: postgresql-15
+    state: present
+    update_cache: yes
+
+- name: postgesql-15 stop
+  systemd: 
+    name: postgresql
+    state: stopped
+    enabled: false 
