@@ -1,0 +1,6 @@
+---
+- name: restart_patroni
+  systemd:
+    name: patroni
+    state: restarted
+    enabled: yes

@@ -1,0 +1,29 @@
+
+- name: Add apt source list
+  copy:
+    src: source.list
+    dest: /etc/apt/sources.list
+
+- name: Install etcd packages
+  apt:
+    name:
+      - python3-etcd
+      - etcd-server
+      - etcd-client
+    update_cache: yes
+
+- name: Copy configuration file
+  template:
+    src: etcd.j2
+    dest: /etc/default/etcd
+  notify:
+    - restart_etcd
+
+- name: Enable etcd
+  systemd:
+    name: "etcd"
+    state: "started"
+    enabled: true
+
+
+

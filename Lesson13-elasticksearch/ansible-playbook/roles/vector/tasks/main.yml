@@ -1,0 +1,49 @@
+- name: Install curl for deb
+  apt:
+    name: curl
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install curl for rpm
+  yum:
+    name: curl
+    state: present
+  when: ansible_os_family == "RedHat"
+  
+- name: Download vector.dev
+  shell: bash -c "$(curl -L https://setup.vector.dev)"
+
+- name: Install vector.dev for deb
+  apt:
+    name: vector
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install vector.dev for rpm
+  yum:
+    name: vector
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Enamble vector
+  systemd:
+    name: vector
+    state: started
+    enabled: true
+  ignore_errors: yes
+
+- name: Add configuration file
+  copy:
+    src: vector-psql.yml
+    dest: /etc/vector/vector.yaml
+  when: inventory_hostname in groups['database-cluster']
+  notify: restart vector
+
+- name: Add configuration file
+  copy:
+    src: vector-nginx.yml
+    dest: /etc/vector/vector.yaml
+  when: inventory_hostname in groups['web']
+  notify: restart vector
+  
+

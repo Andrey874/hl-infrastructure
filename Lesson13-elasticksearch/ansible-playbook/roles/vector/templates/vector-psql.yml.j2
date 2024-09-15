@@ -1,0 +1,48 @@
+# Change this to use a non-default directory for Vector data storage:
+data_dir: "/var/lib/vector"
+
+# Random Syslog-formatted logs
+sources:
+  postgrya:
+    type: "file"
+    include:
+      - /var/log/postgresql/postgresql-15-main.log
+
+# Parse Syslog logs
+# See the Vector Remap Language reference for more info: https://vrl.dev
+transforms:
+  parse_postgrya:
+    type: "remap"
+    inputs: ["postgrya"]
+    source: |
+      . = parse_json!(.message)
+
+# Print parsed logs to stdout
+sinks:
+  psql-logs:
+    type: elasticsearch
+    api_version: "v7"
+    inputs:
+      - parse_postgrya
+    endpoints:
+      - "https://10.0.0.21:9200"
+      - "https://10.0.0.22:9200"
+      - "https://10.0.0.23:9200"
+    suppress_type_name: true
+    bulk:
+      action: "create"
+      index: 'psql-logs-%Y-%m-%d'
+    tls:
+      verify_certificate: false
+    auth:
+      user: admin
+      password: ACadmin123!
+      strategy: basic
+
+# Vector's GraphQL API (disabled by default)
+# Uncomment to try it out with the `vector top` command or
+# in your browser at http://localhost:8686
+# api:
+#   enabled: true
+#   address: "127.0.0.1:8686"
+

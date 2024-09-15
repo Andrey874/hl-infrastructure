@@ -1,0 +1,44 @@
+global
+    maxconn 100000
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    mode               tcp
+    log                global
+    retries            2
+    timeout queue      5s
+    timeout connect    5s
+    timeout client     60m
+    timeout server     60m
+    timeout check      15s
+
+
+### PostgreSQL ###
+listen postgres_master
+    bind {{ web_internal_ip }}:5000
+    option tcplog
+    option httpchk OPTIONS /master
+    http-check expect status 200
+    default-server inter 3s fastinter 1s fall 3 rise 4 on-marked-down shutdown-sessions
+    server postgres-srv1 postgres-srv1:5432 check port 8008
+    server postgres-srv2 postgres-srv2:5432 check port 8008
+    server postgres-srv3 postgres-srv3:5432 check port 8008
+
+listen postgres_replicas
+    bind {{ web_internal_ip }}:5001
+    option tcplog
+    option httpchk OPTIONS /replica
+    balance roundrobin
+    http-check expect status 200
+    default-server inter 3s fastinter 1s fall 3 rise 2 on-marked-down shutdown-sessions
+    server postgres-srv1 postgres-srv1:5432 check port 8008
+    server postgres-srv2 postgres-srv2:5432 check port 8008
+    server postgres-srv3 postgres-srv3:5432 check port 8008
+### PostgreSQL ###

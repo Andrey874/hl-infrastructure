@@ -1,0 +1,64 @@
+---
+
+- name: Opensearch installation & configuration
+  hosts: os-cluster
+  gather_facts: true
+  become: true
+  roles:
+    - { role: linux/opensearch }
+
+- name: Opensearch dashboards installation & configuration
+  hosts: dashboards
+  gather_facts: true
+  become: true
+  roles:
+    - { role: linux/dashboards }
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - etcd
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - postgresql
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - patroni
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - haproxy
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - createdb
+
+- hosts: web
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - web
+
+- hosts: all
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - vector

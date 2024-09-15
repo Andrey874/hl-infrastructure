@@ -1,0 +1,35 @@
+---
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+- name: stop firewall
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: false
+  ignore_errors: yes
+
+- name: Install haproxy
+  dnf:
+    name: haproxy
+    state: present
+
+- name: Create directory /run/haproxy
+  file:
+    path: /run/haproxy
+    state: directory
+
+- name: Add configuration file
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+  notify: restart haproxy
+
+- name: enable haproxy
+  systemd:
+    name: haproxy
+    state: started
+    enabled: true

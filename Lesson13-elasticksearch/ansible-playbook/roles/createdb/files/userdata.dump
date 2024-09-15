@@ -1,0 +1,269 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 15.8 (Debian 15.8-1.pgdg120+1)
+-- Dumped by pg_dump version 15.8 (Debian 15.8-1.pgdg120+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: pastedata; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pastedata (
+    dataid integer NOT NULL,
+    userid integer,
+    addtime date DEFAULT '1970-01-01'::date NOT NULL,
+    data text NOT NULL
+);
+
+
+ALTER TABLE public.pastedata OWNER TO postgres;
+
+--
+-- Name: pastedata_dataid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.pastedata_dataid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.pastedata_dataid_seq OWNER TO postgres;
+
+--
+-- Name: pastedata_dataid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.pastedata_dataid_seq OWNED BY public.pastedata.dataid;
+
+
+--
+-- Name: userdetail; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.userdetail (
+    userid integer NOT NULL,
+    changetime date DEFAULT '1970-01-01'::date NOT NULL,
+    fullname text,
+    lastname text,
+    email character varying(255),
+    phone character varying(31),
+    address text,
+    birthdate date
+);
+
+
+ALTER TABLE public.userdetail OWNER TO postgres;
+
+--
+-- Name: userdetail_userid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.userdetail_userid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.userdetail_userid_seq OWNER TO postgres;
+
+--
+-- Name: userdetail_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.userdetail_userid_seq OWNED BY public.userdetail.userid;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.users (
+    userid integer NOT NULL,
+    addtime date DEFAULT '1970-01-01'::date NOT NULL,
+    username text NOT NULL,
+    password_hash bytea
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.users_userid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_userid_seq OWNER TO postgres;
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.users_userid_seq OWNED BY public.users.userid;
+
+
+--
+-- Name: pastedata dataid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pastedata ALTER COLUMN dataid SET DEFAULT nextval('public.pastedata_dataid_seq'::regclass);
+
+
+--
+-- Name: userdetail userid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.userdetail ALTER COLUMN userid SET DEFAULT nextval('public.userdetail_userid_seq'::regclass);
+
+
+--
+-- Name: users userid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public.users_userid_seq'::regclass);
+
+
+--
+-- Data for Name: pastedata; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.pastedata (dataid, userid, addtime, data) FROM stdin;
+1	1	2024-08-17	\\x247b646174617d
+2	1	2024-08-17	\\x6669727374657374
+3	1	2024-08-17	\\x
+4	1	2024-08-17	\\x534756736247386763474630636d397561534277633239305a334a6c6379426a6248567a6447567943673d3d
+5	1	2024-08-17	SGVsbG8gY2x1c3RlciBwb3N0Z3JlcyBmcm9tIHdlYgo=
+6	1	2024-08-17	U29tZSB0ZXN0Cg==
+7	1	2024-08-17	test from console
+8	1	2024-08-17	test from console
+9	1	2024-08-17	QW5hdGhlciBTb21lIHRlc3QK
+10	1	2024-08-17	QW5hdGhlciBTb21lIHRlc3QK
+11	1	2024-08-17	
+12	1	2024-08-17	Y2ggemEgbmFoCg==
+13	1	2024-08-17	Y2ggemEgbmFoCg==
+14	1	2024-08-17	
+15	1	2024-08-17	dHJvbG8gbG9sb29sbyBsb29vCg==
+16	1	2024-08-17	b25lIG1vcmUgeWV0IHRlc3QK
+17	1	2024-08-17	ZG9kb2Rmb2ZvIG9nZ2RnZHAK
+18	1	2024-08-17	b25lIG1vcmUgeWV0IHRyb2xvbAo=
+19	1	2024-08-17	ZGRkIGRkZCBkZGQK
+20	1	2024-08-17	cnJyIHJyciBycnIK
+21	1	2024-08-17	dmJjYnYK
+22	1	2024-08-17	ZHNmZGYgc2RhCg==
+23	1	2024-08-17	c2FkIGRmYWZhcwo=
+\.
+
+
+--
+-- Data for Name: userdetail; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.userdetail (userid, changetime, fullname, lastname, email, phone, address, birthdate) FROM stdin;
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.users (userid, addtime, username, password_hash) FROM stdin;
+1	2024-08-17	guru	\\xa5ab2cc28add
+2	2024-08-17	test	\\xa5ab2cc28addb5eb2d
+\.
+
+
+--
+-- Name: pastedata_dataid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.pastedata_dataid_seq', 23, true);
+
+
+--
+-- Name: userdetail_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.userdetail_userid_seq', 1, false);
+
+
+--
+-- Name: users_userid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.users_userid_seq', 2, true);
+
+
+--
+-- Name: pastedata pastedata_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pastedata
+    ADD CONSTRAINT pastedata_pkey PRIMARY KEY (dataid);
+
+
+--
+-- Name: userdetail userdetail_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.userdetail
+    ADD CONSTRAINT userdetail_pkey PRIMARY KEY (userid);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (userid);
+
+
+--
+-- Name: userdetail user_constraint; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.userdetail
+    ADD CONSTRAINT user_constraint FOREIGN KEY (userid) REFERENCES public.users(userid) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+
+--
+-- Name: pastedata user_constraint_two; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pastedata
+    ADD CONSTRAINT user_constraint_two FOREIGN KEY (userid) REFERENCES public.users(userid) ON UPDATE RESTRICT ON DELETE CASCADE;
+
+
+--
+-- PostgreSQL database dump complete
+--
+

@@ -1,0 +1,26 @@
+
+[os-cluster]
+osearch1 ansible_connection=local  ansible_user=andrey ip=10.0.0.21 roles=data,master
+osearch2 ansible_host=osearch2  ansible_user=andrey ip=10.0.0.22 roles=data,ingest
+osearch3 ansible_host=osearch3  ansible_user=andrey ip=10.0.0.23 roles=data,ingest
+
+[master]
+osearch1
+
+[dashboards]
+osearch1
+
+[database-cluster]
+postgres-srv1 ansible_host=postgres-srv1 ansible_user=andrey etcd_host_name=etcd1 etcd_host_ip='10.0.0.11'
+postgres-srv2 ansible_host=postgres-srv2 ansible_user=andrey etcd_host_name=etcd2 etcd_host_ip='10.0.0.12'
+postgres-srv3 ansible_host=postgres-srv3 ansible_user=andrey etcd_host_name=etcd3 etcd_host_ip='10.0.0.13'
+
+[web]
+web ansible_host=web ansible_user=andrey web_internal_ip='10.0.0.10'
+
+#[osearch1]
+#localhost ansible_connection=local ansible_user=andrey
+
+[all:vars]
+ansible_ssh_common_args=' -o StrictHostKeyChecking=no'
+
