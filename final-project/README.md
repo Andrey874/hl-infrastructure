@@ -96,16 +96,6 @@ Daemon Status:
 `ENDPOINTS=$(etcdctl member list | grep -o '[^ ]\+:2379' | paste -s -d,)`  
 `etcdctl endpoint status --endpoints=$ENDPOINTS -w table` 
 ```commandline
-+ Cluster: pg-cluster-skynet (7425645227224403947) ---------+-----------------+
-| Member | Host      | Role    | State     | TL | Lag in MB | Tags            |
-+--------+-----------+---------+-----------+----+-----------+-----------------+
-| etcd1  | 10.0.0.35 | Leader  | running   |  1 |           | clonfrom: false |
-| etcd2  | 10.0.0.36 | Replica | streaming |  1 |         0 | clonfrom: false |
-| etcd3  | 10.0.0.37 | Replica | streaming |  1 |         0 | clonfrom: false |
-+--------+-----------+---------+-----------+----+-----------+-----------------+
-```
-`patronictl -c /etc/patroni/config.yml list`
-```commandline
 +-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 |       ENDPOINT        |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |
 +-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
@@ -114,3 +104,14 @@ Daemon Status:
 | http://10.0.0.71:2379 | c5ed78b879d8c762 |  3.4.23 |   20 kB |     false |      false |         2 |        363 |                363 |        |
 +-----------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 ```
+`patronictl -c /etc/patroni/config.yml list`
+```commandline
++ Cluster: pg-cluster-skynet (7425645227224403947) ---------+-----------------+
+| Member | Host      | Role    | State     | TL | Lag in MB | Tags            |
++--------+-----------+---------+-----------+----+-----------+-----------------+
+| etcd1  | 10.0.0.35 | Leader  | running   |  1 |           | clonfrom: false |
+| etcd2  | 10.0.0.36 | Replica | streaming |  1 |         0 | clonfrom: false |
+| etcd3  | 10.0.0.37 | Replica | streaming |  1 |         0 | clonfrom: false |
++--------+-----------+---------+-----------+----+-----------+-----------------+
+```
+
