@@ -1,0 +1,23 @@
+[frontend]
+loadbalancer1 ansible_connection=local ansible_user=andrey
+loadbalancer2 ansible_host=loadbalancer2 ansible_user=andrey
+
+[backend]
+web1 ansible_host=web1 ansible_user=andrey
+web2 ansible_host=web2 ansible_user=andrey
+web3 ansible_host=web3 ansible_user=andrey
+
+[storage]
+stotage ansible_host=storage ansible_user=andrey
+
+[pcs_master]
+web1 ansible_host=web1 ansible_user=andrey
+
+[data_base]
+db-dss ansible_host=db-dss ansible_user=andrey
+
+[keepalived_master]
+lb1 ansible_connection=local ansible_host=loadbalancer1 ansible_user=andrey
+
+[keepalived_backup]
+lb2 ansible_host=loadbalancer2 ansible_user=andrey

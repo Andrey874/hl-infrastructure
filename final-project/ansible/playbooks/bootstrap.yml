@@ -1,0 +1,138 @@
+- hosts: all
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - predeploy
+
+- hosts: storage
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - iscsi-tgt
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - iscsi-initiator
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - multipath
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - pcs
+
+- hosts: pcs_master
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - dlm-clvmd-rsc
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - shared-lvm
+
+- hosts: pcs_master
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - mk-gfs2
+
+- hosts: pcs_master
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - gfs2-rsc
+
+- hosts: pcs_master
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - fence
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - web
+
+- hosts: frontend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - front
+
+- hosts: keepalived_master
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - vrrp
+  vars:
+    priority: 101
+    secret_passwd: QQ6Zoh
+
+- hosts: keepalived_backup
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - vrrp
+  vars:
+    priority: 100
+    secret_passwd: QQ6Zoh
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - etcd
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - postgresql
+
+- hosts: database-cluster
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - patroni
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - haproxy
+
+- hosts: backend
+  user: root
+  become: true
+  become_user: root
+  roles:
+    - createdb

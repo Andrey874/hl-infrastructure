@@ -1,0 +1,22 @@
+---
+- name: Copy database dump file
+  copy:
+    src: userdata.dump
+    dest: /tmp
+  when: ansible_hostname == 'web1'
+
+- name: Enable dnf module postgresql
+  command: "dnf module enable postgresql:15 -y"
+
+- name: Install postgresql client
+  dnf:
+    name: postgresql
+    state: present
+
+- name: create db
+  shell: "psql postgres://postgres:postgres@127.0.0.1:5000 -c 'create database userdata;'"
+  when: ansible_hostname == 'web1'
+
+- name: restore db
+  shell: "psql postgres://postgres:postgres@127.0.0.1:5000/userdata < /tmp/userdata.dump"
+  when: ansible_hostname == 'web1'

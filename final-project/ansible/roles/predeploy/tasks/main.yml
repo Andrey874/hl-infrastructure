@@ -1,0 +1,129 @@
+- name: install firewalld
+  apt:
+    name: firewalld
+    state: present
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: install firewalld
+  yum:
+    name: firewalld
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: start and enable firewal
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: firewall services rules for web
+  firewalld:
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_items:
+    - http
+    - https
+    - high-availability
+  when: inventory_hostname in groups['backend']
+
+- name: Enable ports 8080-8084  rules for web
+  firewalld:
+    port: "{{ item[0] }}/{{ item[1] }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_nested:
+    - [ 8080, 8081, 8082, 8083, 8084, 8888, 8443, 8444, 8445, 9091, 9707, ]
+    - [ 'tcp' ]
+  when: inventory_hostname in groups['backend']
+
+- name: Enable ports 30000-33000  rules for web
+  firewalld:
+    port: 30000-33000/udp
+    immediate: true
+    permanent: true
+    state: enabled
+  when: inventory_hostname in groups['backend']
+
+- name: Enable ports 1935  rules for web
+  firewalld:
+    port: 1935/udp
+    immediate: true
+    permanent: true
+    state: enabled
+  when: inventory_hostname in groups['backend']
+
+- name: firewall rules for loadbalancer
+  firewalld:
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_items:
+    - http
+    - https
+  when: inventory_hostname in groups['frontend']
+
+- name: Enable ports 8080-8084  rules for loadbalancer
+  firewalld:
+    port: "{{ item[0] }}/{{ item[1] }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_nested:
+    - [ 8080, 8081, 8082, 8083, 8084, 8888, 8443, 8444, 8445, 9091, 9707 ]
+    - [ 'tcp' ]
+  when: inventory_hostname in groups['frontend']
+
+- name: Enable ports 30000-33000  rules for loadbalancer
+  firewalld:
+    port: 30000-33000/udp
+    immediate: true
+    permanent: true
+    state: enabled
+  when: inventory_hostname in groups['frontend']
+
+- name: Enable ports 1935  rules for loadbalancer
+  firewalld:
+    port: 1935/udp
+    immediate: true
+    permanent: true
+    state: enabled
+  when: inventory_hostname in groups['frontend']
+
+- name: firewall rules for storage
+  firewalld:
+    port: "{{ item[0] }}/{{ item[1] }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_nested:
+    - [ 860, 3260 ]
+    - [ 'tcp', 'udp' ]
+  when: inventory_hostname in groups['storage']
+
+- name: firewall rules for database
+  firewalld:
+    port: "{{ item[0] }}/{{ item[1] }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_nested:
+    - [ 5432, 5433, 8300, 8500, 8301, 8302, 8008, 5000, 5001, 2379, 2380 ]
+    - [ 'tcp', 'udp' ]
+  when: inventory_hostname in groups['database-cluster']
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_os_family == 'RedHat'
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+  when: ansible_os_family == 'RedHat' 

@@ -1,0 +1,5 @@
+---
+
+interface: eth0
+virtual_router_id: 1
+virtual_ipaddress: 172.16.0.5

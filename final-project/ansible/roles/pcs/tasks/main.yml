@@ -1,0 +1,85 @@
+- name: Install clusters packages
+  dnf:
+    name:
+      - dlm
+      - lvm2-lockd
+      - gfs2-utils
+      - pacemaker
+      - pcs
+      - fence-agents-all 
+      - sbd
+      - watchdog
+    state: present
+    enablerepo: resilientstorage,highavailability
+
+- name: Add watchdog.conf
+  file:
+    path: /etc/modules-load.d/watchdog.conf
+    mode: '0755' 
+    state: touch
+
+- name: Enable watchdog
+  shell: 'echo softdog > /etc/modules-load.d/watchdog.conf'
+
+- name: Restart systemd-modules-load
+  systemd:
+    name: systemd-modules-load
+    state: restarted
+
+- name: Add sbd device into /etc/sysconfig/sbd
+  lineinfile:
+    path: /etc/sysconfig/sbd
+    regexp: '^SBD_DEVICE='
+    line: 'SBD_DEVICE="/dev/mapper/sbd"'
+
+- name: Enable pcsd
+  systemd:
+    name: pcsd
+    state: started
+    enabled: true
+
+- name: Set password hacluster user
+  shell: "echo hapassword | passwd --stdin hacluster"
+
+- name: Hosts auth
+  command: "pcs host auth web1 web2 web3 -u hacluster -p hapassword"
+  when: ansible_hostname == 'web1'
+
+- name: Cluster setup
+  command: "pcs cluster setup skynet web1 web2 web3"
+  when: ansible_hostname == 'web1'
+
+- name: Enable cluster
+  command: "{{ item }}"
+  with_items:
+    - "pcs cluster enable --all"
+    - "pcs cluster start --all"
+  when: ansible_hostname == 'web1'
+
+- name: Change lvm.conf
+  lineinfile:
+    path: /etc/lvm/lvm.conf
+    regexp: 'use_lvmlockd ='
+    line: use_lvmlockd = 1
+
+- name: Enable lvmlockd
+  systemd:
+    name: lvmlockd
+    state: started
+    enabled: true
+
+- name: Enable dlm
+  systemd:
+    name: dlm
+    state: started
+    enabled: true
+
+- name: waiting... 15 sec
+  pause:
+    seconds: 15
+
+- name: Eanble sbd service
+  systemd:
+    name: "sbd"
+    state: "stopped"
+    enabled: true

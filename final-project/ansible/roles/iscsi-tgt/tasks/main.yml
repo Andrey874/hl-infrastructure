@@ -1,0 +1,54 @@
+
+- name: install packages
+  dnf:
+    name: "targetcli"
+    state: "present"
+
+- name: "Enable targetclid"
+  systemd:
+    name: "targetclid"
+    state: "started"
+    enabled: true
+
+- name: "Enable target"
+  systemd:
+    name: "target"
+    state: "started"
+    enabled: true
+
+- name: Create directory for iscsi fileio
+  file:
+    path: /var/iscsi-files
+    state: directory
+    mode: '0755'
+
+- name: Add block device
+  command: sudo targetcli /backstores/block create disk01 /dev/vdb
+  ignore_errors: true
+
+- name: Create IQN
+  command: targetcli /iscsi create iqn.2024-10.my.project
+  ignore_errors: true
+
+- name: Create lun for block device
+  command: targetcli /iscsi/iqn.2024-10.my.project/tpg1/luns create /backstores/block/disk01 lun=1
+  ignore_errors: true
+
+- name: Create fileio
+  command: targetcli /backstores/fileio create name=file_for_vbd size=1G file_or_dev=/var/iscsi-files/vbd
+  ignore_errors: true
+
+- name: Create lun for fileio
+  command: targetcli /iscsi/iqn.2024-10.my.project/tpg1/luns create /backstores/fileio/file_for_vbd lun=2
+  ignore_errors: true
+
+- name: Create acls
+  command: "targetcli /iscsi/iqn.2024-10.my.project/tpg1/acls create {{ item }}"
+  with_items:
+    - iqn.2024-10.my.project:web1
+    - iqn.2024-10.my.project:web2
+    - iqn.2024-10.my.project:web3
+  ignore_errors: true
+
+- name: Save target config
+  command: targetcli saveconfig

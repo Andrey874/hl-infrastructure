@@ -1,0 +1,22 @@
+vrrp_script nginx_check {
+  script "/usr/bin/curl http://127.0.0.1"
+  interval 5
+  user nginx
+}
+
+vrrp_instance VI_1 {
+  interface {{interface}}
+  state MASTER
+  virtual_router_id {{virtual_router_id}}
+  priority {{priority}}
+  virtual_ipaddress {
+    {{virtual_ipaddress}}/28
+  }
+  track_script {
+    nginx_check
+  }
+  authentication {
+    auth_type PASS
+    auth_pass {{secret_passwd}}
+        }
+}

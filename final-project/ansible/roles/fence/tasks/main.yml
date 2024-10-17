@@ -1,0 +1,26 @@
+- name: Create sbd on /dev/mapper/sbd
+  command: "sbd -d /dev/mapper/sbd create"
+
+- name: Create resource stonith:sbd
+  command: 'pcs stonith create fence-sbd fence_sbd devices="/dev/mapper/sbd" power_timeout=20'
+
+- name: set stonith-timeout
+  command: 'pcs property set stonith-timeout="12s"'
+
+- name: set cluster-recheck-interval
+  command: 'pcs property set cluster-recheck-interval="1m"'
+
+- name: enable stonith
+  command: "pcs property set stonith-enabled=true"
+
+- name: set fence-reaction
+  command: 'pcs property set fence-reaction="panic"'
+
+- name: set no-quorum-policy
+  command: "pcs property set no-quorum-policy=suicide"
+
+- name: Stop cluster
+  command: 'pcs cluster stop --all'
+
+- name: Start cluster
+  command: 'pcs cluster start --all'

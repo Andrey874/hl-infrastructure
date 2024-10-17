@@ -1,0 +1,8 @@
+- name: This example creates the dlm resource as part of a resource group named locking
+  command: pcs resource create dlm --group locking ocf:pacemaker:controld op monitor interval=30s on-fail=fence
+
+- name: Clone the locking resource group
+  command: pcs resource clone locking interleave=true
+
+- name: Set up an lvmlockd resource as part of the locking resource group
+  command: pcs resource create lvmlockd --group locking ocf:heartbeat:lvmlockd op monitor interval=30s on-fail=fence

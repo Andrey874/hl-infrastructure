@@ -1,0 +1,27 @@
+- name: Install multipath
+  become: true
+  dnf:
+    name: "device-mapper-multipath"
+    state: "present"
+
+- name: Enable multipath
+  command: mpathconf --enable --with_multipathd y
+
+- name: Register sdb ID
+  command: /usr/lib/udev/scsi_id --whitelisted --replace-whitespace --device=/dev/sdb
+  register: disk5g
+
+- name: Register sde ID
+  command: /usr/lib/udev/scsi_id --whitelisted --replace-whitespace --device=/dev/sdd
+  register: disk_for_sbd
+
+- name: Add multipath configuration file
+  template:
+    src: multipath.conf.j2
+    dest: /etc/multipath.conf 
+
+- name: Enable multipathd
+  systemd:
+    name: multipathd
+    state: restarted
+    enabled: true

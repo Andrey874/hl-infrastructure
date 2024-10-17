@@ -1,0 +1,27 @@
+[frontend]
+loadbalancer1 ansible_host=loadbalancer1 ansible_user=andrey
+loadbalancer2 ansible_host=loadbalancer2 ansible_user=andrey
+
+[backend]
+web1 ansible_connection=local ansible_user=andrey web_internal_ip='127.0.0.1'
+web2 ansible_host=web2 ansible_user=andrey web_internal_ip='127.0.0.1'
+web3 ansible_host=web3 ansible_user=andrey web_internal_ip='127.0.0.1'
+
+[database-cluster]
+pg1 ansible_host=pg1 ansible_user=andrey etcd_host_name=etcd1 etcd_host_ip='10.0.0.71' patroni_host_ip='10.0.0.35'
+pg2 ansible_host=pg2 ansible_user=andrey etcd_host_name=etcd2 etcd_host_ip='10.0.0.72' patroni_host_ip='10.0.0.36'
+pg3 ansible_host=pg3 ansible_user=andrey etcd_host_name=etcd3 etcd_host_ip='10.0.0.73' patroni_host_ip='10.0.0.37'
+
+[storage]
+storage ansible_host=storage ansible_user=andrey
+
+[pcs_master]
+web1 ansible_host=web1 ansible_user=andrey
+
+[keepalived_master]
+loadbalancer1  ansible_host=loadbalancer1 ansible_user=andrey
+
+[keepalived_backup]
+loadbalancer2 ansible_host=loadbalancer2 ansible_user=andrey
+
+

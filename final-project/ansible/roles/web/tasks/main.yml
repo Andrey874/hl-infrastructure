@@ -1,0 +1,40 @@
+---
+- name: Install softwara nginx and epel-release
+  dnf:
+    name:
+      - epel-release
+      - nginx
+    state: present
+
+- name: Install software
+  dnf:
+    name: fcgiwrap
+    state: present
+
+- name: Add nginx config
+  template: 
+    src: site.conf.j2
+    dest: /etc/nginx/conf.d/site.conf
+
+- name: Add nginx fcgiwrap.conf
+  template:
+    src: fcgiwrap.conf
+    dest: /etc/nginx/fcgiwrap.conf
+
+- name: create cgi-bin directory
+  copy:
+    src: cgi-bin
+    dest: /usr/lib/
+    mode: 0755
+
+- name: Enable fcgi
+  systemd:
+    name: fcgiwrap@nginx.socket
+    enabled: true
+    state: started
+
+- name: "Enable nginx"
+  systemd:
+    name: "nginx"
+    state: "started"
+    enabled: true
