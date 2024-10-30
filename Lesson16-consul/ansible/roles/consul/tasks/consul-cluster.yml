@@ -1,0 +1,62 @@
+- name: Consul Server Install Packages
+  dnf: 
+    name:
+      - unzip
+      - bind-utils
+    state: latest
+    update_cache: true
+
+- name: Consul Server Add user
+  user:
+    name: consul
+    shell: /bin/false
+    system: false
+    create_home: false
+
+- name: Consul Server Copy consul binaries
+  copy:
+    src: consul_1.20.0_linux_amd64.zip
+    dest: /tmp/consul_1.20.0_linux_amd64.zip
+
+- name: Consul Server Unarchive consul binaries
+  unarchive:
+    src: /tmp/consul_1.20.0_linux_amd64.zip
+    dest: /usr/bin
+    remote_src: true
+
+- name: Consul Server Make directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: consul
+    group: consul
+  loop:
+  - /etc/consul.d/
+  - /var/lib/consul
+
+- name: Consul Server Configure
+  copy:
+    src: consul-server.hcl
+    dest: /etc/consul.d/consul.hcl
+    owner: consul
+    group: consul
+  notify: reload consul
+
+- name: Consul Cluster Configure
+  template:
+    src: consul-cluster.json.j2
+    dest: /etc/consul.d/config.json
+    owner: consul
+    group: consul
+  notify: reload consul
+
+- name: Consul Server  Copy systemd unit
+  copy:
+    src:  consul.service
+    dest: /etc/systemd/system/consul.service
+
+- name: Consul Server Start consul service
+  systemd:
+    name: consul
+    state: started
+    daemon_reload: true

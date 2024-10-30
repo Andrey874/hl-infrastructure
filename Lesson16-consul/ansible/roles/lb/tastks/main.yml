@@ -1,0 +1,45 @@
+---
+- name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+
+- name: Install software
+  dnf:
+    name:
+      - nginx
+    state: present
+
+- name: Add nginx config
+  copy: 
+    src: site.conf
+    dest: /etc/nginx/conf.d/site.conf
+
+- name: Consul Server Make directories
+  file:
+    path: /opt/nginx/html
+    state: directory
+    owner: nginx
+    group: nginx
+
+- name: Add nginx config
+  template:
+    src: index.html.j2
+    dest: /opt/nginx/html/index.html
+
+- name: Add tmpcl
+  template:
+    src: loadbalancer.ctmpl.j2
+    dest: /etc/nginx/conf.d/loadbalancer.ctmpl
+
+- name: Add balancer conf
+  template:
+    src: loadbalancer.conf.j2
+    dest: /etc/nginx/conf.d/loadbalancer.conf.j2
+
+- name: "Enable nginx"
+  systemd:
+    name: "nginx"
+    state: "started"
+    enabled: true

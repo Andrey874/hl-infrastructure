@@ -1,5 +1,8 @@
 ---
 
+- name: Include consul-servers
+  include_tasks: consul-cluster.yml
+  when: inventory_hostname in groups['consul']
 
 - name: Include consul-clients
   include_tasks: consul-client.yml

@@ -1,11 +1,14 @@
+[consul]
+consul1 ansible_host=consul1 ansible_user=andrey
+consul2 ansible_host=consul2 ansible_user=andrey
+consul3 ansible_host=consul3 ansible_user=andrey
 
 [web]
 web1 ansible_connection=local ansible_host=web1 ansible_user=andrey 
 web2 ansible_host=web2 ansible_user=andrey
 
 [loadbalancer]
-loadbalancer1 ansible_host=loadbalancer1 ansible_user=andrey
-loadbalancer2 ansible_host=loadbalancer2 ansible_user=andrey
+loadbalancer ansible_host=loadbalancer ansible_user=andrey
 
 [web:vars]
 service_name=web

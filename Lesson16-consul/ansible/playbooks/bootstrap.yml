@@ -1,5 +1,15 @@
-- hosts: web,loadbalancer
+- hosts: web,loadbalancer,consul
   become: true
   roles:
     - consul
+
+- hosts: web
+  become: true
+  roles:
+    - web
+
+- hosts: loadbalancer
+  become: true
+  roles:
+    - lb
 

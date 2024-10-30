@@ -2,6 +2,6 @@
         "node_name": "{{ inventory_hostname }}",
         "data_dir": "/etc/consul.d/data",
         "retry_join": ["consul1", "consul2", "consul3"],
-	"advertise_addr": "{{ ansible_ens224.ipv4.address }}",
+	"advertise_addr": "{{ ansible_eth0.ipv4.address }}",
         "enable_local_script_checks": true
 }
