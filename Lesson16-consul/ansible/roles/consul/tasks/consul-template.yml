@@ -1,0 +1,61 @@
+- name: Consul Template Install Packages
+  dnf: 
+    name:
+      - unzip
+    state: latest
+    update_cache: true
+
+- name: Consul Template | Add user
+  user:
+    name: "consul"
+    shell: "/bin/false"
+    system: false
+    create_home: false
+
+- name: Consul Template Copy binaries
+  copy:
+    src: consul-template_0.39.0_linux_amd64.zip
+    dest: /tmp/consul-template_0.39.0_linux_amd64.zip
+
+- name: Consul Template Unarchive consul binaries
+  unarchive:
+    src: /tmp/consul-template_0.39.0_linux_amd64.zip
+    dest: /usr/bin
+    remote_src: true
+
+- name: Consul Template Make directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: consul
+    group: consul
+  loop:
+  - /etc/consul-template.d
+  - /etc/consul-template.d/templates
+
+- name: Consul Template Configure consul templates
+  copy:
+    src: consul-template-config.hcl
+    dest: /etc/consul-template.d/config.hcl
+    owner: consul
+    group: consul
+  notify: reload consul-template
+
+- name: Consul Template Add sudoers no passwd
+  community.general.sudoers:
+    name: consul
+    user: consul
+    commands: 
+    - "/usr/sbin/nginx -s reload"
+
+- name: Consul Template Copy systemd units
+  copy:
+    src: consul-template.service
+    dest: /etc/systemd/system/consul-template.service
+
+- name: Consul Template Start consul-template service
+  systemd:
+    name: consul-template
+    state: restarted
+    enabled: true
+    daemon_reload: true

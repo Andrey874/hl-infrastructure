@@ -1,0 +1,5 @@
+- hosts: web,loadbalancer
+  become: true
+  roles:
+    - consul
+

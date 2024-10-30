@@ -1,0 +1,10 @@
+---
+
+
+- name: Include consul-clients
+  include_tasks: consul-client.yml
+  when: inventory_hostname in (groups['web'] + groups['loadbalancer'])
+
+- name: Include consul-templates
+  include_tasks: consul-template.yml
+  when: inventory_hostname in groups['loadbalancer']

@@ -1,0 +1,14 @@
+
+[web]
+web1 ansible_connection=local ansible_host=web1 ansible_user=andrey 
+web2 ansible_host=web2 ansible_user=andrey
+
+[loadbalancer]
+loadbalancer1 ansible_host=loadbalancer1 ansible_user=andrey
+loadbalancer2 ansible_host=loadbalancer2 ansible_user=andrey
+
+[web:vars]
+service_name=web
+
+[loadbalancer:vars]
+service_name=loadbalancer

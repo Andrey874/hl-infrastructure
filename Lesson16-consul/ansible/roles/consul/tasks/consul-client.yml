@@ -1,0 +1,71 @@
+- name:  Install packages on cosul clients
+  dnf: 
+    name:
+      - unzip
+      - bind-utils
+    state: latest
+    update_cache: true
+
+- name:  Add user on consul client
+  user:
+    name: "consul"
+    shell: "/bin/bash"
+    system: false
+    create_home: false
+
+- name:  Copy consul binaries consul client
+  copy:
+    src: consul_1.20.0_linux_amd64.zip
+    dest: /tmp/consul_1.20.0_linux_amd64.zip
+
+- name: Consul Client unzip consul
+  unarchive:
+    src: /tmp/consul_1.20.0_linux_amd64.zip
+    dest: /usr/bin
+    remote_src: true
+
+- name: Make directories on consul client
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: consul
+    group: consul
+  loop:
+  - /etc/consul.d
+  - /var/lib/consul
+
+- name: Consul Client  Configure hcl
+  copy:
+    src: consul-client.hcl
+    dest: /etc/consul.d/consul.hcl
+    owner: consul
+    group: consul
+  notify: reload consul
+
+- name: Consul Client  Configure json
+  template:
+    src: config-client.json.j2
+    dest: /etc/consul.d/config.json
+    owner: consul
+    group: consul
+  notify: reload consul
+
+- name: Consul Client  Configure Services
+  template:
+    src: consul-client-service.json.j2
+    dest: /etc/consul.d/consul-client-service.json
+    owner: consul
+    group: consul
+  notify: reload consul
+
+- name: Consul Client Copy systemd units
+  copy:
+    src: consul.service
+    dest: /usr/lib/systemd/system/consul.service
+
+- name: Consul Client Start consul service
+  systemd:
+    name: consul
+    state: restarted
+    enabled: true
+    daemon_reload: true
