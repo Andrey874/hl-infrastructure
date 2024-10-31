@@ -11,32 +11,16 @@
       - nginx
     state: present
 
-- name: Add nginx config
-  copy: 
-    src: site.conf
-    dest: /etc/nginx/conf.d/site.conf
-
-- name: Consul Server Make directories
-  file:
-    path: /opt/nginx/html
-    state: directory
-    owner: nginx
-    group: nginx
-
-- name: Add nginx config
-  template:
-    src: index.html.j2
-    dest: /opt/nginx/html/index.html
-
 - name: Add tmpcl
   template:
     src: loadbalancer.ctmpl.j2
     dest: /etc/nginx/conf.d/loadbalancer.ctmpl
+  notify: reload consul-template
 
 - name: Add balancer conf
   template:
     src: loadbalancer.conf.j2
-    dest: /etc/nginx/conf.d/loadbalancer.conf.j2
+    dest: /etc/nginx/conf.d/loadbalancer.conf
 
 - name: "Enable nginx"
   systemd:

@@ -12,11 +12,11 @@
         },
         "advertise_addr": "{{ ansible_eth0.ipv4.address }}",
         "bootstrap_expect": 3,
-        {% set host_list = [] %}
-        {% for i in groups.consul_servers %}
-        {% if inventory_hostname != i %}
-        {{ host_list.append(hostvars[i].ansible_host) }}
-        {%- endif %}
-        {% endfor %}
-        retry_join = [ "{{ host_list | join('", "') }}" ]
+{% set host_list = [] %}
+{% for i in groups.consul %}
+{% if inventory_hostname != i %}
+{{ host_list.append(hostvars[i].ansible_host) }}
+{%- endif %}
+{% endfor %}
+        "retry_join": [ "{{ host_list | join('", "') }}" ]
 }

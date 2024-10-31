@@ -1,11 +1,12 @@
 upstream backend {
-        {{ range service "web" }}
-        server {{.Node}}:{{.Port}};{{end}}
+       {% raw %}{{ range service "web" }}
+        server {{.Node}}:{{.Port}};{{end}}{% endraw %}
+
 }
 
 server {
         listen 80;
-        server_name {{ ansible_eth0.ipv4.address }};
+        server_name "{{ ansible_eth0.ipv4.address }}";
         location / {
           proxy_pass http://backend;
         }
