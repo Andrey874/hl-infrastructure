@@ -11,19 +11,19 @@
       - nginx
     state: present
 
-- name: Add tmpcl
-  template:
-    src: loadbalancer.ctmpl.j2
-    dest: /etc/nginx/conf.d/loadbalancer.ctmpl
-  notify: reload consul-template
+- name: "Enable nginx"
+  systemd:
+    name: "nginx"
+    state: "started"
+    enabled: true
 
 - name: Add balancer conf
   template:
     src: loadbalancer.conf.j2
     dest: /etc/nginx/conf.d/loadbalancer.conf
 
-- name: "Enable nginx"
-  systemd:
-    name: "nginx"
-    state: "started"
-    enabled: true
+- name: Add tmpcl
+  template:
+    src: loadbalancer.ctmpl.j2
+    dest: /etc/nginx/conf.d/loadbalancer.ctmpl
+  notify: reload consul-template
