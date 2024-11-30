@@ -1,0 +1,23 @@
+lb1:
+  host: 10.0.0.2
+  user: andrey
+  priv: /home/andrey/.ssh/id_rsa
+  sudo: True
+
+lb2:
+  host: 10.0.0.3
+  user: andrey
+  priv: /home/andrey/.ssh/id_rsa
+  sudo: True
+
+web1:
+  host: 10.0.0.4
+  user: andrey
+  priv: /home/andrey/.ssh/id_rsa
+  sudo: True
+
+web2:
+  host: 10.0.0.5
+  user: andrey
+  priv: /home/andrey/.ssh/id_rsa
+  sudo: True
